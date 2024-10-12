@@ -45,4 +45,7 @@ var (
 
 	//go:embed ui.png
 	UI_png []byte
+
+	//go:embed circle.jpg
+	Circle_jpg []byte
 )

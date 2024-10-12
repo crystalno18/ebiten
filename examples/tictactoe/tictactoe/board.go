@@ -1,9 +1,14 @@
 package tictactoe
 
 import (
+	"bytes"
+	"image"
 	"image/color"
+	_ "image/jpeg"
+	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/examples/resources/images"
 )
 
 const (
@@ -16,6 +21,13 @@ const (
 type Board struct {
 	size       int
 	blackPixel *ebiten.Image
+	circleImg  *ebiten.Image
+	touchPos   *Pos
+}
+
+type Pos struct {
+	x int
+	y int
 }
 
 func NewBoard(size int) (*Board, error) {
@@ -25,6 +37,16 @@ func NewBoard(size int) (*Board, error) {
 	if b.blackPixel == nil {
 		b.blackPixel = ebiten.NewImage(linePixel, linePixel)
 		b.blackPixel.Fill(color.Black)
+	}
+	if b.circleImg == nil {
+		img, _, err := image.Decode(bytes.NewReader(images.Circle_jpg))
+		if err != nil {
+			log.Fatal(err)
+		}
+		b.circleImg = ebiten.NewImageFromImage(img)
+	}
+	if b.touchPos == nil {
+		b.touchPos = &Pos{x: 83, y: 172}
 	}
 	return b, nil
 }
@@ -57,4 +79,10 @@ func (b *Board) Draw(boardImage *ebiten.Image) {
 		}
 	}
 
+	if b.touchPos != nil {
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(float64(b.touchPos.x), float64(b.touchPos.y))
+		op.ColorScale.ScaleWithColor(frameColor)
+		boardImage.DrawImage(b.circleImg, op)
+	}
 }

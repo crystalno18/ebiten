@@ -1,7 +1,10 @@
 package tictactoe
 
 import (
+	"fmt"
+
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 const (
@@ -13,6 +16,8 @@ const (
 type Game struct {
 	board      *Board
 	boardImage *ebiten.Image
+	cursorX    int
+	cursorY    int
 }
 
 func NewGame() (*Game, error) {
@@ -22,6 +27,7 @@ func NewGame() (*Game, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return g, nil
 }
 
@@ -30,6 +36,13 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func (g *Game) Update() error {
+	mx, my := ebiten.CursorPosition()
+	g.cursorX, g.cursorY = mx, my
+	if mx > 0 && my > 0 && ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+		g.board.touchPos.x = mx
+		g.board.touchPos.x = my
+		g.board.Draw(g.boardImage)
+	}
 	return nil
 }
 
@@ -41,6 +54,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.board.Draw(g.boardImage)
 	op := _getDrawImageOptionAtGeoMMiddle(screen, g)
 	screen.DrawImage(g.boardImage, op)
+
+	msg := fmt.Sprintf("(%d, %d)", g.cursorX, g.cursorY)
+	ebitenutil.DebugPrint(screen, msg)
 }
 
 func _getDrawImageOptionAtGeoMMiddle(screen *ebiten.Image, g *Game) (drawOp *ebiten.DrawImageOptions) {
